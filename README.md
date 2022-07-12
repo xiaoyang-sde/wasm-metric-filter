@@ -2,9 +2,9 @@
 
 The WebAssembly Metric Filter is an Envoy filter developed with [proxy-wasm-rust-sdk](https://github.com/proxy-wasm/proxy-wasm-rust-sdk). The filter augments the HTTP streams and exports additional metrics that could improve monitoring systems. The metrics are rooted at `wasmcustom` and contain the following statistics:
 
-|Name|Type|Description|
-|-|-|-|
-|`upstream_rq_<status>_<response_code_details>`|Counter|The count of [response code details](https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_conn_man/response_code_details) for each HTTP response status (e.g., `upstream_rq_500_via_upstream`)|
+|Name|Type|Description|Example|
+|-|-|-|-|
+|`upstream_rq_<status>_[<response_code_details>]`|Counter|The count of [response code details](https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_conn_man/response_code_details) for each HTTP response status|`upstream_rq_500_[via_upstream]`|
 
 ## Install and Build
 
@@ -30,9 +30,33 @@ $ curl localhost:8080/status/500
 
 # Inspect the metrics exported from the filter
 $ curl -s localhost:9901/stats | grep wasmcustom
-wasmcustom.upstream_rq_200_via_upstream: 1
-wasmcustom.upstream_rq_400_via_upstream: 1
-wasmcustom.upstream_rq_500_via_upstream: 1
+wasmcustom.upstream_rq_200_[via_upstream]: 1
+wasmcustom.upstream_rq_400_[via_upstream]: 1
+wasmcustom.upstream_rq_500_[via_upstream]: 1
+```
+
+## Configuration
+
+```yaml
+http_filters:
+  - name: envoy.filters.http.wasm
+    typed_config:
+      "@type": type.googleapis.com/udpa.type.v1.TypedStruct
+      type_url: type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
+      value:
+        config:
+          configuration:
+              "@type": type.googleapis.com/google.protobuf.StringValue
+              # The filter configuration declares if a metric should be exported
+              value: |
+                {
+                  "response_code_details": true,
+                }
+          vm_config:
+            runtime: "envoy.wasm.runtime.v8"
+            code:
+              local:
+                filename: "./pkg/wasm_metric_filter_bg.wasm"
 ```
 
 ## Reference
