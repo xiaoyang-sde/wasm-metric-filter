@@ -22,34 +22,24 @@ impl RootContext for MetricFilterRoot {
         let raw_configuration = match self.get_plugin_configuration() {
             Some(configuration) => configuration,
             None => {
+                log(LogLevel::Info, "failed to get the configuration").ok();
+                return false;
+            }
+        };
+
+        self.configuration = match from_slice::<MetricFilterConfiguration>(&raw_configuration) {
+            Ok(configuration) => configuration,
+            Err(error) => {
                 log(
                     LogLevel::Info,
-                    &format!(
-                        "failed to get the configuration",
-                    ),
+                    &format!("failed to parse the configuration: {}", error,),
                 )
                 .ok();
                 return false;
-            },
+            }
         };
 
-        self.configuration =
-            match from_slice::<MetricFilterConfiguration>(&raw_configuration) {
-                Ok(configuration) => configuration,
-                Err(error) => {
-                    log(
-                        LogLevel::Info,
-                        &format!(
-                            "failed to parse the configuration: {}",
-                            error,
-                        ),
-                    )
-                    .ok();
-                    return false;
-                },
-            };
-
-        return true;
+        true
     }
 
     fn create_http_context(&self, _context_id: u32) -> Option<Box<dyn HttpContext>> {

@@ -1,14 +1,7 @@
 use serde::Deserialize;
 
-#[derive(Deserialize, Clone, Copy)]
+#[derive(Deserialize, Clone, Copy, Default)]
 pub struct MetricFilterConfiguration {
     pub response_code_details: bool,
-}
-
-impl Default for MetricFilterConfiguration {
-    fn default() -> Self {
-        MetricFilterConfiguration {
-            response_code_details: false,
-        }
-    }
+    pub response_flags: bool,
 }

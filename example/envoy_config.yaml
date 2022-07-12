@@ -33,6 +33,10 @@ static_resources:
                                 key: "x-response-code-details"
                                 value: "%RESPONSE_CODE_DETAILS%"
                               append: true
+                            - header:
+                                key: "x-response-flags"
+                                value: "%RESPONSE_FLAGS%"
+                              append: true
                 http_filters:
                   - name: envoy.filters.http.wasm
                     typed_config:
@@ -45,6 +49,7 @@ static_resources:
                               value: |
                                 {
                                   "response_code_details": true,
+                                  "response_flags": true
                                 }
                           vm_config:
                             runtime: "envoy.wasm.runtime.v8"
